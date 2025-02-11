@@ -5,6 +5,8 @@
 ## Problem definition
 
 My client, L.Y., has developed a new interest in the fascinating world of hydroponics. He decided to keep one specimen of hydroponics in his room for personal use and potentially academic experiments. He occasionally puts the plant out to a different location in the campus when the room environment is too unsuitable. Yet after a week of closely paying attention to and maintaining proper care for the plant, he realized that the plant showed some alarming visual signs of weakening color and general shape. After some online investigation, he had determined that the possible cause of this problem was the temperature of the room where the plant was kept being too low, the humidity levels being too high or perhaps too low, and the atmospheric pressure being lower due to the high altitude. Based on this knowledge, he felt that he needed to carefully monitor and successfully manage those particular variables that, one way or another, had a strong influence on the growth and overall health of the plant. Additionally, he wants to determine when and how long the plant should be located in the alternate position. Overall, my client is concerned about the lack of environmental monitoring capabilities both indoors and outdoors, for the wellbeing of his plant.
+See the evidence: 
+[Gmail - Hydroponics Plant Health Monitoring.pdf](https://github.com/user-attachments/files/18095935/Gmail.-.Hydroponics.Plant.Health.Monitoring.pdf)
 
 ## Proposed Solution
 Considering the client requirements an adequate solution includes a low cost sensing device for humidity, temperature and atmospheric pressure, and a custom data script that process and anaysis the samples acquired. For a low cost sensing device an adequate alternative is the DHT11 sensor[^1] which is offered online for less than 5 USD and provides adequare precision and range for the client requirements (Temperature Range: 0°C to 50°C, Humidity Range: 20% to 90%). Similar devices such as the DHT22, AHT20 or the AM2301B [^2] have higher specifications, however the DHT11 uses a simple serial communication (SPI) rather than more eleborated protocols such as the I2C used by the alternatives. For the range, precision and accuracy required in this applicaiton the DHT11 provides the best compromise. Additionally, BME280 sensor is an affordable, satisfactory contender for providing high accuracy atmospheric pressure data through I2C communication, one of the required variables for the client (Pressure range: 300hPa to 1100 hPa)[^5]. Connecting the DHT11 sensor and BME280 sensor to a computer requires a device that provides a Serial Port communication. A cheap and often used alternative for prototyping is the Raspberry Pi 3b+ single-board computer [^3]. "The Raspberry Pi is a very cheap computer that runs Linux, but it also provides a set of GPIO (general purpose input/output) pins, allowing you to control electronic components for physical computing and explore the Internet of Things (IoT)."[^4]. In additon to the low cost of the Raspberry Pi (< 60USD), this device is programable and expandable, with features such as internet connection[^4]. I considered alternatives such different versions of the Raspberry Pi but their size and price make them a less adequate solution.
@@ -23,6 +25,8 @@ Considering the budgetary constrains of the client and the hardware requirements
 [^7]:Real Python. “Python vs C++: Selecting the Right Tool for the Job.” Real Python, Real Python, 19 June 2021, https://realpython.com/python-vs-cpp/#memory-management. 
 [^8]:Matplotlib Development Team. "Matplotlib: Visualization with Python", https://matplotlib.org/
 [^9]:Kenneth Reitz. "Requests: HTTP for Humans", https://requests.readthedocs.io/en/latest/
+[^10]:Python Software Foundation. "time — Time access and conversions", https://docs.python.org/3/library/time.html
+[^11]:Jeffrey Erickson. "What Is JSON?", Oracle, 4 April 2024, https://www.oracle.com/database/what-is-json/
 
 1. The solution provides a visual representation of the Humidity, Temperature and atmospheric pressure values inside a dormitory (Local) and outside the house (Remote) for a period of minimum 48 hours. ```** [Issue tacled] **: My client's lack of environmental monitoring equipments has been resolved now. ```
 2. The local variables will be measure using a set of sensors around the dormitory.```** [Issue tacled] **: Client can get more accurate data for both indoor and outdoor conditions. ```
@@ -51,11 +55,11 @@ _TOK Connection: To what extent does ```the use of data science``` in climate re
 
 
 ## Flow diagrams for algorithms
-![image](https://github.com/user-attachments/assets/ca365701-0527-4dfe-9d98-3040e1117661)
+![image](https://github.com/user-attachments/assets/89928934-a4fc-4c2b-b93c-39f473dcd20c)
 
 **Fig.2**  This flowchart describes the process of continuously reading sensor data, extracting relevant information, and sending it to a server for further processing. The process is repeated indefinitely, with a delay of 1 second between each iteration and a pause of 1 minute between each measurement.
 
-![image](https://github.com/user-attachments/assets/9ea1d165-8287-402b-b5ad-f920c1c2facc)
+![image](https://github.com/user-attachments/assets/28c7ca7a-17a9-4c2b-bb68-ae5aaa7db580)
 
 
 
@@ -65,7 +69,7 @@ _TOK Connection: To what extent does ```the use of data science``` in climate re
 
 
 
-![image](https://github.com/user-attachments/assets/6cdab434-2982-4260-8f15-9b59e9d2d0f0)
+![image](https://github.com/user-attachments/assets/ddf081ee-9468-42d3-a120-3253364ca50a)
 
 
 **Fig.4** The flowchart outlines a process for fetching data from a server, filtering it based on a specific sensor ID, and then plotting the filtered data over time. The data is processed and visualized using various libraries, and a smoothing technique is applied to the plot for better readability.
@@ -138,12 +142,13 @@ For example, this data, {"sensor_id": 203, "value": 18.0, "datetime": "2024-12-0
 ## List of techniques used
 
 1. API communication with remote server
-2. Filtering using moving average
-3. Plotting x-axis with hourly format
+2. Pushing sensor measurements data promptly
+3. Read values and timestamps of the recorded data in the server
+4. Filtering using moving average
 
 ### 1. API communication with remote server
 
-To solve SC#5: data backup to a remote server, and address SC#1/SC#3/SC#4: acquire data from a remote location, we needed a way to pull and push data to a server from both Raspberry Pi and personal computer. We used UWC ISAK Japan Weather API as our server: a centralized database for values such as temperature, humidity and atmospheric pressure measured regularly on campus. In order to communicate with the server, we used an HTTP python library called Requests, which enable us to get and post data with simple coding[^9].
+To solve **SC#5**: data backup to a remote server, and address **SC#1**/**SC#3**/**SC#4**: acquire data from a remote location, we needed a way to pull and push data to a server from both Raspberry Pi and personal computer. We used our school Weather API as our server: a centralized database for values such as temperature, humidity and atmospheric pressure measured regularly on campus. In order to communicate with the server, we used an HTTP python library called `Requests`, which enable us to get and post data with simple coding[^9].
 ```.py
 import requests
 
@@ -158,7 +163,7 @@ for r in readings:
     if r['sensor_id'] == 205:
         print((r['value'],r['datetime']))
 ```
-This is a basic representation of the pulling procedure to the personal computer from the server. The program first specifies the IP address of the server, then uses the .get method, which sends a GET request to the specified url. To the returned JSON response object, using .json() converts the body into a python object, in this case a dictionary. With appropriate arrangement of key access and "if" conditions, the program can acquire the desired data from a specific sensor or datetime.
+This is a basic representation of the pulling procedure to the personal computer from the server. The program first specifies the IP address of the server, then uses the `.get` method, which sends a GET request to the specified url. To the returned JSON response object, using `.json()` converts the body into a python object, in this case a dictionary. With appropriate arrangement of key access and "if" conditions, the program can acquire the desired data from a specific sensor or datetime.
 
 ```.py
 import requests
@@ -173,12 +178,104 @@ auth = {"Authorization": f"Bearer {cookie}"}
 new_record = {"sensor_id":203, "value":temp_dht, "datetime":now}  # temp_dht: value read from DHT11  now: datetime.now()
 answer = requests.post(f'http://{server_ip}/reading/new', json = new_record, headers = auth)
 ```
-This is a basic representation of the upload procedure from the Raspberry Pi to the server. Authorization is done using the .post method towards the login url, which will send a POST request with the username and password for a user which already had been registered to the server. Its answer provides an access token which can be used for the header for posting the sensor values. The posting of the data is also done using the .post method but now directed towards new readings url, taking the dictionary object which will be converted to json.
+This is a basic representation of the upload procedure from the Raspberry Pi to the server. Authorization is done using the `.post` method towards the login url, which will send a POST request with the username and password for a user which already had been registered to the server. Its answer provides an access token which can be used for the header for posting the sensor values. The posting of the data is also done using the `.post` method but now directed towards new readings url, taking the dictionary object which will be converted to json.
 
-### 2. Filtering using moving average
+### 2. Pushing sensor measurements data promptly
 
-To solve SC#1 I encounter the problem that the values from teh sensors are noisy due to the changes in the
-temperature and other variables. I thougt about using an algorithm to filter the data and smooth it. After some reseach
+To meet **SC#1**, we needed to read measurements at a constant interval which depicts the transition over 48 hours. For accurate representation of the change in environment, we set the interval to be one minute. To record 48 hours of consecutive data with an interval of one minute, we needed to have a program which sends measurements with accurate frequency. We first tried to use `time.sleep(60)` inside a loop, which suspends the following lines by the value given, just like below[^10].
+```.py
+while True:
+    # Sending process comes here
+    time.sleep(60)
+```
+However, we realized that with method, if the 'sending process' has its own processing time, the execution of the loop will be delayed by having extra elapsed time in addition to the `time.sleep(60)`. That will cause a shift in the interval which might accumulate into having less data than expected. So, we realized that we need to adjust the suspension, ideally dynamic. We thought of calculating the elapsed time during the 'sending process' and subtracting the value from `time.sleep(60)`, which looks like below.
+```.py
+while True:
+    start = time.time()
+    # Sending process comes here
+    end = time.time()
+    time.sleep(60-(end-start))
+```
+Because `time.time()` will give us the elapsed time from 1970 January 1st to the line executed in floating-point numbers[^10], calculating the difference between `start` and `end` will give us the accurate elapsed time. However, testing this code out revealed that the effects were trivial, and we thought it is not a fundamental approach to our objective, which was for the code to send measurements on time with consistent intervals. Therefore, we have changed our method and thought of a way to send the measurements corresponding to the conditions based on time, which is below.
+```.py
+while True:
+    now = datetime.now()  # gets the local time in datetime object
+    now = str(now) # coverts to string ("Year-Month-Date Hour:Minute:Second" format. Second is floating-point number")
+    nowsec = now.split()[1].split(":")[2]  # splits "Year-Month-Date Hour:Minute:Second" into two by space and takes the second one, then takes the third element divided by colons, which is 'seconds'
+    
+    if float(nowsec) <= 0.9:
+        # Sending process comes here
+        time.sleep(1)
+```
+Here, the program gets into the sending process only if the condition `float(nowsec) <= 0.9` is met. Variable `nowsec` is the 'seconds' element of the instantaneous timestamp acquired by `datetime.now()`. Overall, `float(nowsec) <= 0.9` condition determines that whenever the program is sending the measurements, its 'seconds' are a roundnumber (e.g. 15:01:00). If its not a roundnumber, the measurements would not be sent because the condition explicitly limits the 'seconds' to be 0.9, practically less than zero. `time.sleep(1)` at the end of the loop prevents the program from re-entering the measuring process again instantaneously after a send, by making the condition impossible to meet ({nowsec < 0.9} is unachievable when {nowsec = previous nowsec + 1}). This method allows the program to send measurements promptly each minute.
+
+### 3. Read values and timestamps of the recorded data in the server
+
+To meet **SC#1**/**SC#3**/**SC#4**/**SC#6**: organize analyze and predict the measurements, we needed to first process the data which the sensors have acquired to make them readable and suitable for analysis. Measurements are stored in the server in a JavaScript Object Notation or simply JSON format, a text-based method to store data which is readable for humans and parsable for programs[^11], in a structure like below.
+```
+{
+  "readings": [
+    [
+      {
+        "sensor_id": 10,
+        "value": 31.85824,
+        "datetime": "2024-11-12T19:20:52.651630",
+        "id": 6066047
+      }
+    ]
+}
+```
+In order to acquire a measured value from an identified source sensor and timestamp, the program has to parse three values `sensor_id`, `value` and `datetime`. However, because Python cannot iterate through a JSON object directly, we used `.json()` to convert the JSON object into a dictionary.
+```.py
+request = requests.get(f'http://{server_ip}/readings') # get every line of JSON from the server storage
+data = request.json() # conversion into a python object (dictionary)
+readings = data['readings'][0] # getting rid of the two outermost brackets
+```
+By doing this, dictionary `readings` is now in a suitable state for the python program to iterate over each measurement made, so the program can specify and extract the values it needs. Below is the code which iterate over each measurements and get the values by specifying the keys.
+```.py
+sensor_204 = [] # list for storing values by DHT_11 humidity measurements
+fdates = [] # list for formatted timestamps
+
+for r in readings:
+    if r['sensor_id'] == 204:
+        tf = timestamp_format(r['datetime'])
+        year, month, date, hour, minute, second = tf[0],tf[1],tf[2],tf[3],tf[4],tf[5]
+        if month == 12 and date == 4 or date == 5:
+            fdates.append(f"{hour}:{minute}:{second}")
+            sensor_204.append(r['value'])
+```
+The program iterates over `readings` in a 'for' loop, to isolate the measurement set that the program takes values, and repeat efficiently corresponding to how many datas are in the `readings`. 
+```.py
+if r['sensor_id'] == 204:
+```
+This 'if' statement is setting a condition that only if the `sensor_id` of the measurement is the desired one, it will move on to extract its value. By doing so, we do not experience mix-up in the values in which what sensor it is taken, and avoid a contamination in the data.
+```.py
+tf = timestamp_format(r['datetime'])
+```
+This line inputs the `datetime` value into `timestamp_format` function and receives a list into `tf`. Function `timestamp_format` is a function that we made to separate each element of the timestamp and convert them into integers or floating-point numbers to make conditioning easier. The function looks like below.
+```.py
+def timestamp_format(timestamp:str):
+    year, month, temp = timestamp.split("-")
+    day, temp = temp.split("T")
+    hour, minute, second = temp.split(":")
+    return int(year), int(month), int(day), int(hour), int(minute), round(float(second),2)
+```
+Here, by string-splitting `{Year}-{Month}-{Day}T{Hour}:{Minute}:{Second}` format, the function returns each time element in numbers. Using those countable values, the program first assigns them into the variables in the loop and then sets another condition based on time, in the line below.
+```.py
+year, month, date, hour, minute, second = tf[0],tf[1],tf[2],tf[3],tf[4],tf[5]
+if month == 12 and date == 4 or date == 5:
+```
+The condition checks if the timestamp that the measurements were made in the time period that the program needs for graphing, to remove the effort needed to slice the list of values and times afterwards. Then finally, the program appends the `value` and formatted `datetime` to designated lists to use for graphing, in the line below.
+```.py
+fdates.append(f"{hour}:{minute}:{second}")
+sensor_204.append(r['value'])
+```
+The program appends only the hour, minute and second, because if it includes the dates, the graphing cannot be done on the same time-oriented x-axis because measurements we use could not always be from the time period. Overall, the program can extract, convert and store values in an appropriate format for graphing later, with conditions that limit the sensor that the measurement was made from and when the measurements were made.
+
+### 4. Filtering using moving average
+
+To solve **SC#1** I encounter the problem that the values from teh sensors are noisy due to the changes in the
+temperature and other variables. I thought about using an algorithm to filter the data and smooth it. After some reseach
 I decided to use the moving average. To make things more sustainable and organized I decided to use a function to
 implemented the moving average and placed it in a library.
 ```.py
@@ -196,17 +293,11 @@ def moving_average(windowSize:int, x:list)->list:
 In the code above, we can see that the function signature includes two inputs, ```windowSize:int ``` is the size used for filtering which is of
 data type integer that decides the range of values which the function will generate averages from, into ```x_smoothed```. Another input is ```x```, which is a list that the function will apply the smoothing to. All the values in ```x``` are intended to be integers or floats.
 
-### 3. Plotting x-axis with hourly format
 
-To solve SC#1/SC#4, that requires a visual representation of the data, we used matplotlib: a comprehensive library for creating static, animated, and interactive visualizations in Python[^8]. Its simple two dimentional graph plotting methods allow users to plot y values that correspond with the values in the x-axis. However, we realized that there are occasional skips in the data, so if we plot the graphs with equal intervals for x (time), the labels for the ticks will not indicate roundnumbers. We struggled for a long time to find a solution to this problem using our knowledge, so we conducted internet research and found out how to force the format of the x-axis into hourly ticks using methods in Matplotlib.
-```.py
-# ax: current x axis (plt.gca())
 
-xfmt = matplotlib.dates.DateFormatter('%H:%M')
-ax.xaxis.set_major_formatter(xfmt)
-ax.xaxis.set_major_locator(HourLocator(byhour=range(0, 24, 1), tz=None))
-```
-```DateFormatter``` is a formatter that will create hourly ticks. ```set_major_formatter``` is a formatter that apply a format to major ticks in the x-axis, that has been set to hourly ticks in this program. ```HourLocator``` is a locator of labels which distribute the value from 0 to 24 with 1 step, which is applied through the use of ```set_major_locator```.
+
+
+
 
 # Criteria D: Functionality
 
