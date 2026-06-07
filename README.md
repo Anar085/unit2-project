@@ -1,4 +1,4 @@
-# Unit 2: A Distributed Weather Station for ISAK
+# Project 2: Distributed Raspberry Pi *IoT* Weather Network: Sensor Data Acquisition (DHT11/BME280), Remote API Synchronization, and Predictive Modeling
 
 ## Criteria A: Planning
 
